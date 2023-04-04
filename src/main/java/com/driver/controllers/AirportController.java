@@ -1,10 +1,14 @@
 package com.driver.controllers;
 
 
+import com.driver.Services.AirportService;
+import com.driver.Services.FlightService;
+import com.driver.Services.PassengerService;
 import com.driver.model.Airport;
 import com.driver.model.City;
 import com.driver.model.Flight;
 import com.driver.model.Passenger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -16,12 +20,15 @@ import java.util.Objects;
 
 @RestController
 public class AirportController {
+
+    @Autowired
+    AirportService obj;
     @PostMapping("/add_airport")
     public String addAirport(@RequestBody Airport airport){
 
         //Simply add airport details to your database
         //Return a String message "SUCCESS"
-
+        obj.add(airport);
         return "SUCCESS";
     }
 
@@ -30,26 +37,31 @@ public class AirportController {
 
         //Largest airport is in terms of terminals. 3 terminal airport is larger than 2 terminal airport
         //Incase of a tie return the Lexicographically smallest airportName
-
-       return null;
+        return obj.getLarge();
+       //return null;
     }
+    @Autowired
+    FlightService fs;
 
     @GetMapping("/get-shortest-time-travel-between-cities")
     public double getShortestDurationOfPossibleBetweenTwoCities(@RequestParam("fromCity") City fromCity, @RequestParam("toCity")City toCity){
 
         //Find the duration by finding the shortest flight that connects these 2 cities directly
         //If there is no direct flight between 2 cities return -1.
-
-       return 0;
+        double ans=fs.shortDuration(fromCity,toCity);
+        if(ans==0.0)return -1;
+        else return ans;
     }
-
+    @Autowired
+    PassengerService pas;
     @GetMapping("/get-number-of-people-on-airport-on/{date}")
     public int getNumberOfPeopleOn(@PathVariable("date") Date date,@RequestParam("airportName")String airportName){
 
         //Calculate the total number of people who have flights on that day on a particular airport
         //This includes both the people who have come for a flight and who have landed on an airport after their flight
-
-        return 0;
+        String city=obj.getCity(airportName);
+        return pas.getCount(city,date);
+        //return 0;
     }
 
     @GetMapping("/calculate-fare")
